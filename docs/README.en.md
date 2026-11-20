@@ -20,6 +20,15 @@
 
 ---
 
+> **🍴 This is a fork of [`amlyczz/dsh-agy-link`](https://github.com/amlyczz/dsh-agy-link) (v0.7.0)** adding two things on top of upstream 0.6.48:
+>
+> 1. **Tick which models the picker shows** (`selectedModels` allow-list) — tick models in the settings panel and only those appear in the DSH `/model` picker; ticking none shows everything.
+> 2. **List account models without the `agy` CLI** — the catalog is now `agy models` discovery merged with the per-account models reported by the official quota endpoint, so quota-only models can still be ticked and shown.
+>
+> Nothing else differs: every other feature, config key and behaviour matches upstream. Use the official package if you want to track upstream.
+
+---
+
 Bring **Google Antigravity models into DeepSeek Harness (DSH)** through the official, unmodified `agy` CLI: streaming, thinking, native tool cards, exact token metering, in-GUI OAuth login, a multi-account pool with automatic rotation, and official multi-bucket quota tracking (5h rolling + 7d weekly + Argon weekly).
 
 ## ✨ Features
@@ -27,6 +36,8 @@ Bring **Google Antigravity models into DeepSeek Harness (DSH)** through the offi
 | | |
 | --- | --- |
 | 🤖 **Antigravity models in DSH** | Gemini 3.8 Flash, Claude 5.5, GPT-OSS … selected from the normal `/model` picker; streaming, thinking blocks, tool cards and usage are native DSH chunks. |
+| ☑️ **Picker allow-list** (new in this fork) | The settings panel lists every model the active account can run as tick boxes; only ticked models reach the `/model` picker, and ticking none means "show everything". A stored selection matches by **model**, not by exact slug, so it survives catalog folding (e.g. `-tiered` merging into its base row); hiding a model never disturbs an in-flight session. |
+| 🧾 **Quota as catalog** (new in this fork) | The catalog is the union of `agy models` discovery and the quota endpoint's `quotas.<family>.models[]`, so accounts can be browsed and ticked **even when the `agy` CLI is not installed**. Duplicate upstream display names fall back to the slug, so no two rows share a label. |
 | 🔁 **Multi-account pool** | Sequential drain or round-robin; per-account isolated HOME, proxy and credentials; quota exhaustion cools the account and moves to the next one automatically. |
 | 📊 **Quota console** | 5h rolling, 7d weekly and Argon weekly buckets; countdowns, cooldowns and one-click sync from the header badge. |
 | 🔐 **In-GUI OAuth** | Add accounts without pasting credentials; headless paste-URL and manual code paths are also supported. |
@@ -48,8 +59,11 @@ Where Google is unreachable directly, enable system proxy/TUN before starting DS
 ## 🚀 Quick start
 
 ```bash
-# Install into the web profile
-dsh plugin --profile web add dsh-agy-link --registry https://registry.npmjs.org
+# This fork (model allow-list) — installed from GitHub, built on install:
+dsh plugin --profile web add github:running-syh/dsh-agy-link
+
+# Upstream official package (no allow-list, prebuilt on npm):
+# dsh plugin --profile web add dsh-agy-link --registry https://registry.npmjs.org
 
 # Start DSH Web
 dsh web
@@ -63,6 +77,8 @@ dsh web
 ```
 
 Add more accounts from the **AGY (n)** badge in the header (browser login), then pick an Antigravity model in `/model`.
+
+> ☑️ **Show only the models you tick**: open **Settings → Antigravity → model visibility** and tick the models you want. Only ticked models reach the `/model` picker; ticking none shows everything (the default). Hiding a model never disturbs a running session.
 
 ## 🗣 Plain-language translation (`/tsl`)
 

@@ -18,6 +18,13 @@
   <a href="./docs/CONFIGURATION.md">完整配置文档</a>
 </p>
 
+> **🍴 这是 [`amlyczz/dsh-agy-link`](https://github.com/amlyczz/dsh-agy-link) 的分叉版（v0.7.0）**，在上游 0.6.48 基础上新增两项能力：
+>
+> 1. **勾选模型选择器显示哪些模型**（`selectedModels` 白名单）—— 在设置面板里点选，勾中的才出现在 DSH 模型选择器；一个都不勾 = 全部显示。
+> 2. **没装 `agy` CLI 也能列出账号可用模型** —— 模型目录改为「`agy models` 发现结果 + 官方配额接口返回的每账号模型」合并，配额里有的模型照样能勾选、能显示。
+>
+> 本分叉**不做单点额外改动**，其余功能、配置键、行为与上游完全一致。想跟进上游请直接用官方包。
+
 ---
 
 # 中文
@@ -91,6 +98,8 @@
 | 📱 **手机 Web 端自适应** | 屏幕宽度 < 680px 时控制台自动转为全屏抽屉面板（`100dvh`），标签开关折行重排，操作按钮等宽网格分布，全面适配触屏滚动 |
 | 🌐 **独立账号代理** | 每个账号支持独立配置 HTTP(S) 代理，隔离 IP 出口；亦可自动探测系统代理 |
 | 🔌 **原生模型路由** | 在 DSH 模型配置中注册 `antigravity` 提供方，`/model` 选择器以 `Antigravity (agy CLI)` 分组随心切换 Gemini / Claude / GPT-OSS / Argon |
+| ☑️ **模型选择器勾选白名单**（本分叉新增） | 设置面板「模型显示」区按账号列出可勾选模型，勾中的才出现在 `/model` 选择器；一个都不勾 = 全部显示。选择按**模型**而非精确 slug 匹配，模型目录折叠（如 `-tiered` 并入基础行）后旧选择依然有效；取消勾选不影响进行中的会话 |
+| 🧾 **配额即模型目录**（本分叉新增） | 模型目录 = `agy models` 发现结果 ∪ 官方配额接口 `quotas.<family>.models[]`。因此**即使没装 `agy` CLI**，也能列出账号实际可用的全部模型并勾选；上游改名重复的 displayName 会自动退回 slug 保证不重名 |
 | 🌊 **完整流式映射** | 文本、思考过程（thinking turn）与工具活动均无损映射到 DSH 原生流协议 |
 | 🃏 **原生工具卡片** | agy 执行的终端命令（`run_command`）、文件修改（inline diff）均以 DSH 原生卡片渲染；MCP 元工具（`call_mcp_tool`）自动拆包为 Terminal/Search 卡片 |
 | 🔗 **会话上下文保真** | DSH 会话与 agy 原生会话绑定（`--conversation`），由 agy 管理完整历史，每轮仅发送增量 |
@@ -127,11 +136,15 @@
 # 0. 确保系统代理 / TUN 模式已开启（国内网络必需）：
 export HTTPS_PROXY=http://127.0.0.1:7890 HTTP_PROXY=http://127.0.0.1:7890
 
-# 1. 安装插件（npm 官方包，无需编译构建）：
-dsh plugin --profile web add dsh-agy-link
+# 1. 安装插件
+#    本分叉版（含模型勾选白名单）——从 GitHub 安装，安装时会自动构建：
+dsh plugin --profile web add github:running-syh/dsh-agy-link
+
+#    上游官方版（不含勾选功能，走 npm 免构建）：
+# dsh plugin --profile web add dsh-agy-link
 
 # 升级到最新版：
-# dsh plugin --profile web add dsh-agy-link@latest --registry https://registry.npmjs.org
+# dsh plugin --profile web add github:running-syh/dsh-agy-link
 
 # 2. 启动 DSH Web GUI，在输入框中检查状态：
 #   /agy status
@@ -143,7 +156,11 @@ dsh plugin --profile web add dsh-agy-link
 #           授权后 30 秒内执行 /agy auth-status 查看最终登录结果。
 
 # 4. 在 /model 选择器中挑选 Antigravity 模型，立即开启对话！
+#    只想看少数几个模型？打开「设置 → Antigravity → 模型显示」勾选即可；
+#    一个都不勾表示全部显示。
 ```
+
+> ☑️ **只显示你勾选的模型**：设置面板「模型显示」区会列出当前账号可用的全部模型，点击勾选/取消。勾中的才会出现在 DSH `/model` 选择器里；一个都不勾 = 全部显示（默认）。取消勾选只是从选择器隐藏，**正在运行的会话不受影响**。
 
 > 无头运行（`dsh headless`）的权限预设与目录白名单见 [docs/HEADLESS-PERMISSIONS.md](./docs/HEADLESS-PERMISSIONS.md)。
 
